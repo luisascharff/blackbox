@@ -1,0 +1,83 @@
+/*This sketch is for the artefact made for the course "Hacking Innovation Bias" at TU Berlin
+
+*/
+
+#include <LiquidCrystal.h>
+
+// Pin connections for LCD display
+const int rs = 12;
+const int en = 11;
+const int d4 = 5;
+const int d5 = 4;
+const int d6 = 3;
+const int d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+// Pin connections for ultrasonic sensor
+const int trigPin = 10;
+const int echoPin = 9;
+
+// Constants for calculating distance
+const float speedOfSound = 343.2; // m/s
+const float distanceConversion = 100.0; // cm
+
+void setup() {
+  // Initialize LCD display
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Analyzing");
+  
+  // Set up ultrasonic sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  
+  // Start serial communication for debugging
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Trigger ultrasonic sensor
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Measure echo pulse duration
+  unsigned long pulseDuration = pulseIn(echoPin, HIGH);
+  
+  // Calculate distance in centimeters
+  float distance = pulseDuration * speedOfSound / (2.0 * distanceConversion);
+
+  //get random gender 
+  String gender[] = {"Male", "Female"};
+
+  int size = sizeof(gender) / sizeof(gender[0]);
+  int randInd = random(0, size);
+
+  String randStr = gender[randInd];
+  Serial.println(randStr);
+  
+  // Display distance on LCD only if a person is detected
+  if (distance > 0 && distance < 120100) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Gender:");
+    lcd.setCursor(0, 1);
+    lcd.print(randStr);
+    delay(7000);
+
+    //lcd.print(distance);
+    //lcd.print(" cm");
+  } else {
+    lcd.clear();
+  }
+  
+  // Print distance to serial monitor for debugging
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  
+  delay(1000);
+}
